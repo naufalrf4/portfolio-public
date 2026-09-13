@@ -1,0 +1,92 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import { HeroSection } from '../components/home/HeroSection';
+import { FeaturedProjects } from '../components/home/FeaturedProjects';
+import { AchievementsPreview } from '../components/home/AchievementsPreview';
+import { Guestbook } from '../components/home/Guestbook';
+import { LatestArticles } from '../components/home/LatestArticles';
+import { TechnicalExpertise } from '../components/home/TechnicalExpertise';
+import ServicesPreview from '../components/home/ServicesPreview.astro';
+import { Meteors } from '../components/ui/Meteors';
+import { getAbout, getProjects, getBlogs, getGuestbookEntries, getAchievements, ApiFetchFailedError } from '../lib/api';
+import { serviceUnavailableResponse } from '../lib/site';
+
+let about, projectsData, blogsData, guestbookData, achievementsData;
+try {
+  [about, projectsData, blogsData, guestbookData, achievementsData] = await Promise.all([
+    getAbout(),
+    getProjects({ featured: true, limit: 3 }),
+    getBlogs(3),
+    getGuestbookEntries(),
+    getAchievements(3),
+  ]);
+} catch (error) {
+  if (error instanceof ApiFetchFailedError) {
+    return serviceUnavailableResponse();
+  }
+  throw error;
+}
+
+const turnstileSiteKey =
+  process.env.PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
+  import.meta.env.PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
+  '';
+
+// The homepage title is the one place branded phrasing is correct: it is what
+// people who already know the name search for, and Google's site-name system
+// reads it. Non-branded targeting belongs on the pages that describe the work.
+const title = 'NaufalRF Portfolio';
+const description =
+  'Full-stack and IoT engineer in Depok, Indonesia. Builds custom hardware, cloud systems, and modern web apps, with AI workflows grounded in real data.';
+---
+
+<PageLayout title={title} description={description}>
+  <Fragment slot="head">
+    <meta name="author" content="Naufal Rizqullah Firdaus" />
+  </Fragment>
+
+  <HeroSection client:load about={about} />
+  <div class="relative z-10 w-full overflow-x-clip">
+    <div>
+      <TechnicalExpertise client:visible />
+    </div>
+    <ServicesPreview />
+    <div>
+      <FeaturedProjects client:visible projects={projectsData.projects} />
+    </div>
+    <div>
+      <AchievementsPreview client:visible achievements={achievementsData.achievements} />
+    </div>
+    <div>
+      <LatestArticles client:visible blogs={blogsData.blogs} />
+    </div>
+    <div>
+      <Guestbook
+        client:visible
+        initialEntries={guestbookData.entries}
+        turnstileSiteKey={turnstileSiteKey}
+      />
+    </div>
+    <section data-scene="signal" class="relative w-full overflow-hidden border-t-2 border-teal">
+      <div class="pointer-events-none absolute inset-0 z-0 opacity-80">
+        <Meteors number={34} client:visible />
+      </div>
+      <div class="relative z-10 mx-auto flex max-w-7xl flex-col justify-between px-4 py-24 sm:flex-row sm:items-end sm:px-6 lg:px-8 lg:py-32">
+        <div class="max-w-2xl">
+          <h2 class="font-display text-4xl font-bold tracking-tight text-text-primary md:text-6xl lg:text-7xl">
+            Building<br/>something?
+          </h2>
+          <p class="mt-6 text-base text-text-secondary md:text-lg">
+            Whether it is an IoT rollout, automation pipeline, or AI workflow, the conversation starts here.
+          </p>
+        </div>
+        <div class="mt-12 sm:mt-0 sm:text-right">
+          <a href="/contact" class="glass-cta group relative inline-flex items-center gap-3 rounded-lg px-6 py-4 font-mono text-sm font-semibold uppercase tracking-widest transition-all duration-300 ease-out hover:-translate-y-0.5 active:translate-y-0">
+            Start a conversation
+            <span class="flex h-6 w-6 items-center justify-center transition-transform group-hover:translate-x-1">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</PageLayout>

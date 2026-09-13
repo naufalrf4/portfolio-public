@@ -1,0 +1,107 @@
+---
+import { ArrowUpRight } from 'lucide-react';
+import { technicalServices } from './data';
+import { MOTIF_PANEL_GRID } from './motifs';
+---
+
+{/*
+  Asymmetric bento: the first service takes a double-width feature cell with a
+  taller motif stage, the remaining four sit as standard cells. Project listing
+  does not support faceted tech filtering (no `?tech=` handling in ProjectsGrid),
+  so each card links to the general /projects index rather than a filtered view.
+*/}
+<section aria-label="Technical services" class="mb-24 md:mb-32">
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      technicalServices.map((service, i) => {
+        const isFeature = i === 0;
+        return (
+          <a
+            href="/projects"
+            class:list={[
+              'card-base group relative flex h-full flex-col overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1',
+              isFeature && 'sm:col-span-2 lg:row-span-1',
+            ]}
+            data-reveal
+            style={{ '--reveal-delay': `${i * 0.08}s` }}
+          >
+            <span
+              aria-hidden="true"
+              class="absolute inset-x-0 top-0 h-px bg-teal opacity-0 transition-opacity duration-500 group-hover:opacity-80"
+            />
+            <span
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+              style="background: radial-gradient(120% 80% at 50% 0%, var(--teal-soft), transparent 65%);"
+            />
+            <div
+              class:list={[
+                'relative flex items-center justify-center overflow-hidden border-b border-line bg-bg-elevated text-teal',
+                isFeature ? 'h-40 md:h-48' : 'h-32',
+              ]}
+              style={MOTIF_PANEL_GRID}
+            >
+              <div
+                class:list={[
+                  'max-w-full opacity-70 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] group-hover:opacity-100',
+                  isFeature ? 'h-[104px] w-[264px]' : 'h-[80px] w-[200px]',
+                ]}
+              >
+                <Fragment set:html={service.motif} />
+              </div>
+              <span
+                aria-hidden="true"
+                class="absolute left-4 top-3 font-mono text-[11px] tracking-wider text-text-tertiary transition-colors duration-500 group-hover:text-teal"
+              >
+                {service.index}
+              </span>
+              <span
+                aria-hidden="true"
+                class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent"
+              />
+            </div>
+            <div class:list={['flex flex-1 flex-col p-6', isFeature && 'md:p-8']}>
+              <h3
+                class:list={[
+                  'mb-2 font-display font-bold text-text-primary transition-colors duration-300 group-hover:text-teal',
+                  isFeature ? 'text-xl md:text-2xl' : 'text-lg',
+                ]}
+              >
+                {service.title}
+              </h3>
+              <p
+                class:list={[
+                  'mb-3 font-medium leading-snug text-text-primary',
+                  isFeature ? 'text-base md:text-lg' : 'text-sm',
+                ]}
+              >
+                {service.outcome}
+              </p>
+              <p
+                class:list={[
+                  'flex-1 leading-relaxed text-text-secondary',
+                  isFeature ? 'text-sm md:max-w-2xl md:text-base' : 'text-sm',
+                ]}
+              >
+                {service.description}
+              </p>
+              <div class="mt-5 flex flex-wrap gap-1.5">
+                {service.stack.map((item) => (
+                  <span class="rounded-md border border-line bg-bg-elevated px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-300 group-hover:border-line-hover group-hover:text-text-secondary">
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <span class="mt-5 inline-flex items-center gap-2 text-sm font-medium text-teal">
+                See related work
+                <span class="flex h-6 w-6 items-center justify-center rounded-full border border-teal/30 bg-[var(--teal-soft)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1">
+                  <ArrowUpRight size={13} />
+                </span>
+              </span>
+            </div>
+          </a>
+        );
+      })
+    }
+  </div>
+</section>

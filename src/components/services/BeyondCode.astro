@@ -1,0 +1,80 @@
+---
+import { ArrowUpRight } from 'lucide-react';
+import SectionHeading from './SectionHeading.astro';
+import { beyondTheCode } from './data';
+import { MOTIF_PANEL_GRID } from './motifs';
+---
+
+{/*
+  Editorial split: motif stage on one side, copy on the other, mirrored on the
+  second card so the pair reads as a spread instead of two identical tiles.
+  Amber accent separates this from the teal technical work above.
+*/}
+<section aria-labelledby="beyond-code-heading" class="mb-24 md:mb-32">
+  <SectionHeading
+    id="beyond-code-heading"
+    eyebrow="Beyond the code"
+    title="Explaining the system"
+    description="Some of the work is not building it, it is making sure other people can."
+  />
+
+  <div class="flex flex-col gap-5">
+    {
+      beyondTheCode.map((offer, i) => {
+        const mirrored = i % 2 === 1;
+        return (
+          <div
+            class="card-base group relative overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 md:grid md:grid-cols-12 md:items-stretch"
+            data-reveal
+            style={{ '--reveal-delay': `${i * 0.1}s` }}
+          >
+            <span
+              aria-hidden="true"
+              class="absolute inset-x-0 top-0 h-px bg-amber opacity-0 transition-opacity duration-500 group-hover:opacity-80"
+            />
+            <div
+              class:list={[
+                'relative flex h-36 items-center justify-center overflow-hidden border-b border-line bg-bg-elevated text-amber md:col-span-5 md:h-auto md:border-b-0',
+                mirrored ? 'md:order-2 md:border-l' : 'md:border-r',
+              ]}
+              style={MOTIF_PANEL_GRID}
+            >
+              <div class="h-[92px] w-[230px] max-w-full opacity-70 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] group-hover:opacity-100">
+                <Fragment set:html={offer.motif} />
+              </div>
+              <span
+                aria-hidden="true"
+                class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent md:hidden"
+              />
+            </div>
+            <div
+              class:list={[
+                'flex flex-col justify-center p-6 md:col-span-7 md:p-9',
+                mirrored && 'md:order-1',
+              ]}
+            >
+              <h3 class="mb-2 font-display text-xl font-bold text-text-primary md:text-2xl">
+                {offer.title}
+              </h3>
+              <p class="mb-3 font-medium leading-snug text-text-primary md:text-lg">
+                {offer.outcome}
+              </p>
+              <p class="text-sm leading-relaxed text-text-secondary md:text-base">
+                {offer.description}
+              </p>
+              <a
+                href="/about"
+                class="mt-6 inline-flex w-fit items-center gap-2 text-sm font-medium text-amber transition-colors hover:text-teal"
+              >
+                More on my background
+                <span class="flex h-6 w-6 items-center justify-center rounded-full border border-amber/30 bg-[var(--amber-soft)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1">
+                  <ArrowUpRight size={13} />
+                </span>
+              </a>
+            </div>
+          </div>
+        );
+      })
+    }
+  </div>
+</section>

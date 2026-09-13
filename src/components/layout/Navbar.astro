@@ -1,0 +1,262 @@
+---
+import { NAV_ITEMS, OTHER_LINKS } from '../../lib/constants';
+import { getPresenceSocketUrl } from '@/lib/site';
+import { ChevronDown, ExternalLink } from 'lucide-react';
+import { AnimatedThemeToggler } from '@/components/ui';
+import { PresenceChip } from '@/components/shared';
+
+const currentPath = Astro.url.pathname;
+const presenceSocketUrl = getPresenceSocketUrl();
+
+const isActive = (href: string) => {
+  if (href === '/') return currentPath === '/';
+  return currentPath.startsWith(href);
+};---
+
+<header id="site-header" class="sticky top-0 z-50 px-4 pt-4 transition-[padding] duration-300">
+  <nav
+    id="site-nav"
+    class="mx-auto max-w-7xl rounded-xl border border-line bg-[color-mix(in_srgb,var(--bg)_82%,transparent)] backdrop-blur-md px-4 sm:px-6 lg:px-8 transition-all duration-300"
+  >
+    <div id="site-nav-inner" class="flex h-16 items-center justify-between transition-all duration-300">
+      <a
+        href="/"
+        class="text-xl font-bold font-display text-teal transition-colors duration-300 hover:brightness-110"
+      >
+        Nau.
+      </a>
+
+      <div class="flex items-center gap-1">
+        <div class="hidden md:flex items-center gap-1">
+          {NAV_ITEMS.map((link) => (
+            <a
+              href={link.href}
+              data-nav-link
+              data-nav-href={link.href}
+              data-active={isActive(link.href) ? 'true' : undefined}
+              aria-current={isActive(link.href) ? 'page' : undefined}
+              class="nav-link px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              {link.label}
+            </a>
+          ))}
+
+          <div class="relative group" id="other-dropdown-container">
+            <button
+              id="other-dropdown-trigger"
+              class="nav-link flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium"
+              aria-expanded="false"
+            >
+              Other
+              <ChevronDown
+                size={16}
+                className="transition-transform duration-300 ease-out group-data-[state=open]:rotate-180"
+              />
+            </button>
+
+            <div
+              id="other-dropdown-menu"
+              class="hidden absolute top-full right-0 mt-2 w-56 py-2 rounded-xl border border-line bg-bg-card shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)]"
+            >
+              {OTHER_LINKS.map((link) => {
+                const Icon = link.icon;
+                const isExternal = link.external;
+                const active = isActive(link.href);
+
+                return (
+                  <a
+                    href={link.href}
+                    target={isExternal ? '_blank' : undefined}
+                    rel={isExternal ? 'noopener noreferrer' : undefined}
+                    data-nav-link={!isExternal ? true : undefined}
+                    data-nav-href={!isExternal ? link.href : undefined}
+                    data-active={active && !isExternal ? 'true' : undefined}
+                    class="nav-link group/item flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-sm"
+                  >
+                    <Icon
+                      size={18}
+                      className="transition-transform duration-300 ease-out group-hover/item:translate-x-0.5 group-hover/item:scale-110"
+                    />
+                    <span class="flex-1">{link.label}</span>
+                    {isExternal && (
+                      <ExternalLink
+                        size={14}
+                        className="text-text-tertiary transition-all duration-300 ease-out group-hover/item:opacity-100 group-hover/item:translate-x-0.5 opacity-60"
+                      />
+                    )}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <AnimatedThemeToggler client:load className="ml-1" />
+        <PresenceChip client:load currentPath={currentPath} socketUrl={presenceSocketUrl} />
+      </div>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .nav-link {
+    color: var(--text-secondary);
+    transition:
+      color 0.25s ease,
+      background-color 0.25s ease;
+  }
+  .nav-link:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-elevated);
+  }
+  .nav-link[data-active] {
+    color: var(--teal);
+    background-color: var(--teal-soft);
+  }
+
+  
+  :global(#site-header.is-scrolled) {
+    padding-top: 0.5rem;
+  }
+  :global(#site-header.is-scrolled #site-nav) {
+    border-color: var(--border-hover);
+    background-color: color-mix(in srgb, var(--bg) 92%, transparent);
+  }
+  :global(#site-header.is-scrolled #site-nav-inner) {
+    height: 3.25rem;
+  }
+
+</style>
+
+<script>
+  interface WindowWithNavbarCleanup extends Window {
+    __navbarCleanup?: () => void;
+  }
+
+  function isPathActive(pathname: string, href: string) {
+    if (href === '/') {
+      return pathname === '/';
+    }
+
+    return pathname === href || pathname.startsWith(href + '/');
+  }
+
+  function syncNavbarActiveState() {
+    const pathname = window.location.pathname;
+    const links = document.querySelectorAll<HTMLAnchorElement>('[data-nav-link][data-nav-href]');
+
+    links.forEach((link) => {
+      const href = link.dataset.navHref;
+      if (!href) {
+        return;
+      }
+
+      const active = isPathActive(pathname, href);
+      if (active) {
+        link.setAttribute('data-active', 'true');
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.removeAttribute('data-active');
+        link.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  function bindNavbarDropdown() {
+    const container = document.getElementById('other-dropdown-container');
+    const trigger = document.getElementById('other-dropdown-trigger');
+    const menu = document.getElementById('other-dropdown-menu');
+    let isOpen = false;
+    let hoverTimeout: number | null = null;
+
+    function setOpen(state: boolean) {
+      isOpen = state;
+      if (state) {
+        menu?.classList.remove('hidden');
+        trigger?.setAttribute('aria-expanded', 'true');
+        trigger?.setAttribute('data-active', 'true');
+      } else {
+        menu?.classList.add('hidden');
+        trigger?.setAttribute('aria-expanded', 'false');
+        trigger?.removeAttribute('data-active');
+      }
+    }
+
+    const handleMouseEnter = () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+      hoverTimeout = window.setTimeout(() => setOpen(true), 100);
+    };
+
+    const handleMouseLeave = () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+      hoverTimeout = window.setTimeout(() => setOpen(false), 150);
+    };
+
+    const handleTriggerClick = (e: Event) => {
+      e.stopPropagation();
+      setOpen(!isOpen);
+    };
+
+    const handleDocumentClick = (e: Event) => {
+      if (container && !container.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    const handleDocumentKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+      }
+    };
+
+    container?.addEventListener('mouseenter', handleMouseEnter);
+    container?.addEventListener('mouseleave', handleMouseLeave);
+    trigger?.addEventListener('click', handleTriggerClick);
+    document.addEventListener('click', handleDocumentClick);
+    document.addEventListener('keydown', handleDocumentKeydown);
+
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+      container?.removeEventListener('mouseenter', handleMouseEnter);
+      container?.removeEventListener('mouseleave', handleMouseLeave);
+      trigger?.removeEventListener('click', handleTriggerClick);
+      document.removeEventListener('click', handleDocumentClick);
+      document.removeEventListener('keydown', handleDocumentKeydown);
+    };
+  }
+
+  function bindHeaderShrink() {
+    const header = document.getElementById('site-header');
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
+      header?.classList.toggle('is-scrolled', window.scrollY > 24);
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    update();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }
+
+  const windowWithNavbarCleanup = window as WindowWithNavbarCleanup;
+
+  function refreshNavbar() {
+    windowWithNavbarCleanup.__navbarCleanup?.();
+    const cleanups = [bindNavbarDropdown(), bindHeaderShrink()];
+    windowWithNavbarCleanup.__navbarCleanup = () => cleanups.forEach((fn) => fn());
+    syncNavbarActiveState();
+  }
+
+  refreshNavbar();
+  document.addEventListener('astro:page-load', () => {
+    refreshNavbar();
+  });
+</script>

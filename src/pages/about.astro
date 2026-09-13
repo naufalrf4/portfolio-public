@@ -1,0 +1,52 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import { AboutContent } from '../components/about/AboutContent';
+import { getAbout, getAchievements, ApiFetchFailedError } from '../lib/api';
+import { serviceUnavailableResponse } from '../lib/site';
+import { buildBreadcrumbSchema, buildProfilePageSchema } from '../lib/seo';
+
+let about, achievementsData;
+try {
+  [about, achievementsData] = await Promise.all([getAbout(), getAchievements()]);
+} catch (error) {
+  if (error instanceof ApiFetchFailedError) {
+    return serviceUnavailableResponse();
+  }
+  throw error;
+}
+
+// BaseLayout appends " - NaufalRF Portfolio", so keep this short enough that
+// the combined title stays inside the ~60 chars search results display.
+const title = 'About Naufal Rizqullah Firdaus';
+const description =
+  'Award-winning Computer Engineering graduate in Depok, Indonesia. Builds full-stack web apps, IoT sensor systems, and AI workflows. CTO at Photobon.id.';
+  'Computer Engineering graduate in Depok, Indonesia. Builds full-stack web apps, IoT sensor systems, and AI-augmented workflows. CTO at Photobon.id.';
+
+const profileSchema = buildProfilePageSchema(
+  about,
+  { canonicalPath: '/about', description },
+  achievementsData.achievements
+);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', path: '/' },
+  { name: 'About', path: '/about' },
+]);---
+
+<PageLayout
+  title={title}
+  description={description}
+  canonicalUrl="/about"
+  ogType="profile"
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(profileSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+    <AboutContent
+      client:load
+      about={about}
+      achievements={achievementsData.achievements}
+    />
+  </div>
+</PageLayout>

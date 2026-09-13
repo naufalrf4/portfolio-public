@@ -1,0 +1,73 @@
+---
+import { PageHero } from '@/components/shared';
+import BeyondCode from '@/components/services/BeyondCode.astro';
+import EngagementPanel from '@/components/services/EngagementPanel.astro';
+import ProcessTimeline from '@/components/services/ProcessTimeline.astro';
+import ServiceGrid from '@/components/services/ServiceGrid.astro';
+import ServicesCta from '@/components/services/ServicesCta.astro';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { getAboutSafe } from '@/lib/api';
+import { beyondTheCode, servedAreas, technicalServices } from '@/components/services/data';
+import { buildBreadcrumbSchema, buildServiceSchema } from '@/lib/seo';
+
+// Services page renders fine even without profile data (availability status,
+// resume link are optional enhancements), so this uses the non-throwing
+// safe variant rather than 503-ing the whole page when the Admin API is
+// unreachable - same reasoning as contact.astro.
+const about = await getAboutSafe();
+
+const title = 'Web, IoT & Automation Services';
+const description =
+  'Full-stack web and product development, system integration, IoT and sensor monitoring, n8n automation, and RAG-based AI integration.';
+
+// The offer catalog is built from the same static data the page renders, so
+// the markup can never advertise a service the page does not actually list.
+const serviceSchema = buildServiceSchema(
+  [...technicalServices, ...beyondTheCode].map((offering) => ({
+    name: offering.title,
+    description: offering.outcome,
+  })),
+  {
+    canonicalPath: '/services',
+    name: 'Engineering, automation, and AI system services',
+    description,
+    // The visible copy is English, but commercial demand in this market is
+    // searched in Indonesian. These are real alternate labels for services the
+    // page already lists, kept in structured data so the design is untouched.
+    alternateNames: [
+      'Jasa pembuatan sistem monitoring IoT',
+      'Jasa IoT developer Jakarta Jabodetabek',
+      'Jasa pembuatan aplikasi web custom',
+      'Jasa integrasi sistem dan API',
+      'Jasa otomasi workflow n8n',
+      'Jasa pembuatan chatbot AI dengan data perusahaan',
+    ],
+    areaServed: servedAreas,
+  }
+);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', path: '/' },
+  { name: 'Services', path: '/services' },
+]);
+---
+
+<PageLayout title={title} description={description} canonicalUrl="/services">
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(serviceSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+  <div class="py-12 md:py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <PageHero
+        eyebrow="Services"
+        title="Ways to work with me"
+        description="System integration, IoT builds, and AI workflows when something needs building. Talks and mentoring when something needs explaining."
+      />
+      <ServiceGrid />
+      <ProcessTimeline />
+      <BeyondCode />
+      <EngagementPanel />
+      <ServicesCta resumeUrl={about.resumeUrl} />
+    </div>
+  </div>
+</PageLayout>

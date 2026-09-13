@@ -1,0 +1,111 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { engagementTypes, workingDetails } from './data';
+import { MOTIF_PANEL_GRID, MOTIF_SIGNAL } from './motifs';
+---
+
+{/*
+  Previous version was a flat stack of rows inside one card, which read as a
+  list rather than a section. This splits it: a sticky identity rail carries the
+  signal motif and working facts, and each engagement becomes its own card with
+  a glyph plate and signal chips so the six options are scannable at a glance.
+*/}
+<section aria-labelledby="engagement-heading" class="mb-24 md:mb-32">
+  <SectionHeading
+    id="engagement-heading"
+    eyebrow="Open to"
+    title="Different shapes, same standard"
+    description="Pick whichever matches how you need to bring someone in. The engineering does not change with the contract type."
+  />
+
+  <div class="grid grid-cols-1 gap-5 lg:grid-cols-12">
+    <div class="lg:col-span-4">
+      <div
+        class="card-base relative overflow-hidden lg:sticky lg:top-24"
+        data-reveal
+      >
+        <div
+          class="relative flex h-36 items-center justify-center overflow-hidden border-b border-line bg-bg-elevated text-teal"
+          style={MOTIF_PANEL_GRID}
+        >
+          <div class="h-[96px] w-[210px] max-w-full opacity-75">
+            <Fragment set:html={MOTIF_SIGNAL} />
+          </div>
+          <span
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent"
+          />
+        </div>
+        <div class="p-6 md:p-7">
+          <p class="mb-5 font-mono text-[11px] uppercase tracking-[0.2em] text-teal">
+            Working details
+          </p>
+          <dl class="flex flex-col">
+            {
+              workingDetails.map((fact, i) => (
+                <div
+                  class:list={[
+                    'flex flex-col gap-0.5 py-3',
+                    i > 0 && 'border-t border-line',
+                  ]}
+                >
+                  <dt class="font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
+                    {fact.label}
+                  </dt>
+                  <dd class="text-sm font-medium text-text-primary">{fact.value}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8">
+      {
+        engagementTypes.map((type, i) => (
+          <div
+            class="card-base group relative flex h-full flex-col overflow-hidden p-6 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
+            data-reveal
+            style={{ '--reveal-delay': `${i * 0.06}s` }}
+          >
+            <span
+              aria-hidden="true"
+              class="absolute inset-y-0 left-0 w-px bg-teal opacity-0 transition-opacity duration-500 group-hover:opacity-70"
+            />
+            <span
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+              style="background: radial-gradient(100% 70% at 0% 0%, var(--teal-soft), transparent 60%);"
+            />
+            <div class="relative mb-4 flex items-start justify-between gap-3">
+              <span
+                aria-hidden="true"
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line bg-bg-elevated p-2.5 text-text-secondary transition-colors duration-500 group-hover:border-teal/40 group-hover:text-teal"
+              >
+                <Fragment set:html={type.glyph} />
+              </span>
+              <span class="shrink-0 font-mono text-[11px] tracking-wider text-text-tertiary transition-colors duration-500 group-hover:text-teal">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+            </div>
+            <h3 class="relative mb-1.5 font-display text-lg font-bold text-text-primary transition-colors duration-300 group-hover:text-teal">
+              {type.label}
+            </h3>
+            <p class="relative mb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-text-tertiary">
+              {type.fit}
+            </p>
+            <p class="relative flex-1 text-sm leading-relaxed text-text-secondary">{type.detail}</p>
+            <div class="relative mt-4 flex flex-wrap gap-1.5 border-t border-line pt-4">
+              {type.signals.map((signal) => (
+                <span class="rounded-md border border-line bg-bg-elevated px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-300 group-hover:border-line-hover group-hover:text-text-secondary">
+                  {signal}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

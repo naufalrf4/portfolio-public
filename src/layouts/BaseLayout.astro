@@ -1,0 +1,358 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/globals.css';
+import { getAboutSafe } from '@/lib/api';
+import { getSiteUrl, getPresenceSocketUrl } from '@/lib/site';
+import Navbar from '../components/layout/Navbar.astro';
+import Footer from '../components/layout/Footer.astro';
+import { MobileBottomNav } from '../components/layout/MobileBottomNav';
+import { ChatWidget } from '../components/chatbot/ChatWidget';
+import { LiveCursorBand } from '../components/home/LiveCursorBand';
+import { ScrollToTopButton } from '../components/shared/ScrollToTopButton';
+import { GlobalScene } from '../components/shared/GlobalScene';
+
+const SITE_NAME = 'NaufalRF Portfolio';
+const DEFAULT_OG_IMAGE = '/og-image.png';
+const about = await getAboutSafe();
+// `sameAs` means "other profiles identifying this same person". The social
+// links list also carries the contact address and the site's own URL: a mailto
+// is not a profile (email has its own property), and naming the canonical host
+// as an alias of itself asserts nothing.
+const sameAs = about.socialLinks
+  .map((link) => link.url)
+  .filter((url) => Boolean(url))
+  .filter((url) => !url.toLowerCase().startsWith('mailto:'))
+  .filter((url) => url.replace(/\/$/, '') !== getSiteUrl().replace(/\/$/, ''));
+const twitterProfile = about.socialLinks.find((link) => {
+  const platform = link.platform.toLowerCase();
+  const url = link.url.toLowerCase();
+  return platform === 'twitter' || platform === 'x' || url.includes('twitter.com/') || url.includes('x.com/');
+});
+const twitterHandle = twitterProfile?.url.split('/').filter(Boolean).pop() || null;
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  canonicalUrl?: string;
+  ogType?: 'website' | 'article' | 'profile';
+  noindex?: boolean;
+  hideFooter?: boolean;
+}
+
+const {
+  title: rawTitle,
+  description,
+  ogImage = DEFAULT_OG_IMAGE,
+  ogImageAlt,
+  canonicalUrl,
+  ogType = 'website',
+  noindex = false,
+  hideFooter = false
+} = Astro.props;
+
+const title = rawTitle === SITE_NAME ? SITE_NAME : `${rawTitle} - ${SITE_NAME}`;
+
+// Only the bundled default is a known 1200x630. Declaring those dimensions for
+// a CMS image we have not measured would tell scrapers to lay out a card at the
+// wrong size, so the hints are emitted only when we can actually vouch for them.
+const isDefaultOgImage = ogImage === DEFAULT_OG_IMAGE;
+const ogImageAltText = ogImageAlt || title;
+
+// Share cards already display the site name separately via `og:site_name`, so
+// repeating it in `og:title` wastes the limited line a card gets before it
+// truncates. The <title> element keeps the suffix - it is what search results
+// and the browser tab need.
+const socialTitle = rawTitle;
+
+const currentPath = Astro.url.pathname;
+const siteUrl = getSiteUrl();
+const canonical = new URL(canonicalUrl || currentPath, siteUrl).href;
+const presenceSocketUrl = getPresenceSocketUrl();
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${siteUrl}/#person`,
+  name: about.fullName || 'Naufal Rizqullah Firdaus',
+  alternateName: 'NaufalRF',
+  description: about.shortBio || about.tagline || description,
+  // Both this global Person and the ProfilePage on /about publish under the
+  // same `@id`, so hardcoding a title here contradicted the CMS-driven one and
+  // asserted two different job titles for one entity. Read the real value and
+  // fall back only when the profile has no roles at all.
+  jobTitle: about.roles?.find((role) => role.trim().length > 0) || 'System & Automation Engineer',
+  knowsAbout: (about.skills ?? [])
+    .map((skill) => skill.name)
+    .filter((name) => Boolean(name && name.trim())),
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Depok',
+    addressRegion: 'West Java',
+    addressCountry: 'Indonesia',
+  },
+  url: siteUrl,
+  sameAs,
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${siteUrl}/#website`,
+  name: SITE_NAME,
+  // Google's site-name system reads alternateName as a shorter display
+  // candidate, and the handle is what people actually search for.
+  alternateName: 'NaufalRF',
+  url: siteUrl,
+  inLanguage: 'en',
+  description,
+  publisher: {
+    '@id': `${siteUrl}/#person`,
+  },
+};---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <script is:inline>
+      (function () {
+        function applyTheme() {
+          var theme = 'dark';
+          try {
+            var stored = localStorage.getItem('theme');
+            if (stored === 'light' || stored === 'dark') theme = stored;
+          } catch (e) {
+            
+          }
+          document.documentElement.dataset.theme = theme;
+        }
+        applyTheme();
+        document.addEventListener('astro:after-swap', applyTheme);
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="alternate" type="application/rss+xml" title="NaufalRF Portfolio" href="/rss.xml" />
+    <meta name="generator" content={Astro.generator} />
+    <ClientRouter />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex, follow" /> : null}
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="NaufalRF Portfolio" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={socialTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, siteUrl).href} />
+    {isDefaultOgImage ? <meta property="og:image:width" content="1200" /> : null}
+    {isDefaultOgImage ? <meta property="og:image:height" content="630" /> : null}
+    <meta property="og:image:alt" content={ogImageAltText} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    {twitterHandle ? <meta name="twitter:site" content={`@${twitterHandle}`} /> : null}
+    {twitterHandle ? <meta name="twitter:creator" content={`@${twitterHandle}`} /> : null}
+    <meta name="twitter:url" content={canonical} />
+    <meta name="twitter:title" content={socialTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, siteUrl).href} />
+    <meta name="twitter:image:alt" content={ogImageAltText} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+    <slot name="head" />
+
+  </head>
+  <body class="bg-background text-foreground min-h-screen" data-page={currentPath === '/' ? 'home' : 'inner'}>
+    <div
+      id="scroll-progress"
+      class="pointer-events-none fixed left-0 right-0 top-0 z-[90] h-[2px] origin-left scale-x-0 bg-teal"
+      aria-hidden="true"
+    >
+    </div>
+    <GlobalScene client:load transition:persist />
+    <LiveCursorBand client:idle currentPath={currentPath} socketUrl={presenceSocketUrl} />
+    <ScrollToTopButton client:load currentPath={currentPath} />
+    <Navbar />
+    <main class="relative z-10 min-h-screen">
+      <slot />
+    </main>
+    {!hideFooter && <Footer className="relative z-10" />}
+    <ChatWidget client:load currentPath={currentPath} />
+    <MobileBottomNav client:load currentPath={currentPath} />
+    <script is:inline>
+      (function () {
+        function setupReveal() {
+          var els = document.querySelectorAll('[data-reveal]:not(.is-revealed)');
+          if (!els.length) return;
+          var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (reduced || !('IntersectionObserver' in window)) {
+            els.forEach(function (el) {
+              el.classList.add('is-revealed');
+            });
+            return;
+          }
+          var io = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-revealed');
+                  io.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.12, rootMargin: '0px 0px -32px 0px' }
+          );
+          els.forEach(function (el) {
+            io.observe(el);
+          });
+        }
+        setupReveal();
+        document.addEventListener('astro:page-load', setupReveal);
+
+        var progressTicking = false;
+        function updateScrollProgress() {
+          progressTicking = false;
+          var bar = document.getElementById('scroll-progress');
+          if (!bar) return;
+          var max = document.documentElement.scrollHeight - window.innerHeight;
+          var p = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+          bar.style.transform = 'scaleX(' + p + ')';
+        }
+        window.addEventListener(
+          'scroll',
+          function () {
+            if (!progressTicking) {
+              progressTicking = true;
+              requestAnimationFrame(updateScrollProgress);
+            }
+          },
+          { passive: true }
+        );
+        updateScrollProgress();
+        document.addEventListener('astro:page-load', updateScrollProgress);
+      })();
+    </script>
+    <script is:inline>
+      {`
+        (function () {
+          if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+          const sessionKey = 'public_analytics_session';
+          let lastTrackedPage = '';
+
+          function getSessionId() {
+            try {
+              const existing = window.localStorage.getItem(sessionKey);
+              if (existing) return existing;
+              const next = 'public-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+              window.localStorage.setItem(sessionKey, next);
+              return next;
+            } catch {
+              return 'public-session';
+            }
+          }
+
+          function getTimezone() {
+            try {
+              return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+            } catch {
+              return '';
+            }
+          }
+
+          function sendAnalytics(payload) {
+            const body = JSON.stringify(payload);
+
+            if (navigator.sendBeacon) {
+              const blob = new Blob([body], { type: 'application/json' });
+              navigator.sendBeacon('/api/analytics', blob);
+              return;
+            }
+
+            fetch('/api/analytics', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body,
+              keepalive: true,
+            }).catch(function () {});
+          }
+
+          function trackPageView() {
+            const page = window.location.pathname || '/';
+            const pageKey = page + window.location.search;
+            if (pageKey === lastTrackedPage) return;
+            lastTrackedPage = pageKey;
+
+            sendAnalytics({
+              page,
+              eventType: 'pageview',
+              entityType: 'page',
+              entityId: pageKey,
+              userSession: getSessionId(),
+              timezone: getTimezone(),
+              data: {
+                title: document.title,
+                url: window.location.href,
+              },
+            });
+          }
+
+          if (!window.__portfolioAnalyticsBound) {
+            window.__portfolioAnalyticsBound = true;
+
+            document.addEventListener('click', function (event) {
+              const target = event.target;
+              if (!(target instanceof Element)) return;
+
+              const button = target.closest('[data-analytics-button]');
+              if (button instanceof HTMLElement) {
+                sendAnalytics({
+                  page: window.location.pathname || '/',
+                  eventType: button.dataset.eventType || 'click',
+                  entityType: button.dataset.entityType || 'button',
+                  entityId: button.dataset.entityId || button.getAttribute('aria-label') || button.textContent?.trim() || 'button',
+                  userSession: getSessionId(),
+                  timezone: getTimezone(),
+                  data: {
+                    label: button.dataset.entityLabel || button.getAttribute('aria-label') || button.textContent?.trim() || 'button',
+                    url: button.dataset.entityUrl || window.location.href,
+                  },
+                });
+                return;
+              }
+
+              const anchor = target.closest('a[href]');
+              if (!(anchor instanceof HTMLAnchorElement)) return;
+
+              const rawHref = anchor.getAttribute('href') || '';
+              if (!rawHref || rawHref.startsWith('javascript:')) return;
+
+              sendAnalytics({
+                page: window.location.pathname || '/',
+                eventType: anchor.dataset.eventType || 'click',
+                entityType: anchor.dataset.entityType || (anchor.target === '_blank' ? 'outbound_link' : 'link'),
+                entityId: anchor.dataset.entityId || rawHref,
+                userSession: getSessionId(),
+                timezone: getTimezone(),
+                data: {
+                  label: anchor.dataset.entityLabel || anchor.textContent?.trim() || rawHref,
+                  url: anchor.dataset.entityUrl || anchor.href,
+                },
+              });
+            }, { passive: true });
+
+            document.addEventListener('astro:page-load', trackPageView);
+          }
+
+          trackPageView();
+        })();
+      `}
+    </script>
+  </body>
+</html>

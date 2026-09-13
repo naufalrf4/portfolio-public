@@ -1,0 +1,21 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { PublicSignInForm } from '../../components/auth/PublicSignInForm';
+
+const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
+
+const title = 'Guestbook Sign In';
+const description = 'Sign in with Google to use the guestbook through the Admin-integrated public user flow.';---
+
+<PageLayout title={title} description={description} canonicalUrl="/auth/signin" noindex>
+  <section class="min-h-screen px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <div class="mx-auto max-w-4xl text-center mb-10">
+      <h1 class="text-4xl md:text-5xl font-bold text-text-primary">Guestbook Sign In</h1>
+      <p class="mt-4 text-lg text-text-secondary max-w-2xl mx-auto">
+        Continue with Google to create or refresh your guestbook identity.
+      </p>
+    </div>
+
+    <PublicSignInForm client:load callbackUrl={callbackUrl} />
+  </section>
+</PageLayout>

@@ -1,0 +1,87 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { processSteps } from './data';
+import { MOTIF_PANEL_GRID } from './motifs';
+---
+
+<section aria-labelledby="process-heading" class="mb-24 md:mb-32">
+  <SectionHeading
+    id="process-heading"
+    eyebrow="How it goes"
+    title="Six stages, no surprises"
+    description="From first message to handover. You know the scope and the price before the building starts, and you never wait until the end to see it."
+  />
+
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      processSteps.map((step, i) => (
+        <div
+          class="card-base group relative flex h-full flex-col overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
+          data-reveal
+          style={{ '--reveal-delay': `${i * 0.07}s` }}
+        >
+          <span
+            aria-hidden="true"
+            class="absolute inset-x-0 top-0 h-px bg-teal opacity-0 transition-opacity duration-500 group-hover:opacity-80"
+          />
+          <div
+            class="relative flex h-28 items-center justify-center overflow-hidden border-b border-line bg-bg-elevated text-teal"
+            style={MOTIF_PANEL_GRID}
+          >
+            <div class="h-[76px] w-[190px] max-w-full opacity-70 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] group-hover:opacity-100">
+              <Fragment set:html={step.motif} />
+            </div>
+            <span
+              aria-hidden="true"
+              class="absolute left-4 top-3 font-mono text-[11px] tracking-wider text-text-tertiary transition-colors duration-500 group-hover:text-teal"
+            >
+              {step.step}
+            </span>
+            <span class="absolute right-3 top-2.5 rounded-md border border-line bg-bg-card px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-text-secondary transition-colors duration-300 group-hover:border-line-hover group-hover:text-teal">
+              {step.phase}
+            </span>
+            <span
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-bg-card to-transparent"
+            />
+          </div>
+          <div class="flex flex-1 flex-col p-6 md:p-7">
+            <div aria-hidden="true" class="mb-4 flex gap-1">
+              {
+                processSteps.map((_, dot) => (
+                  <span
+                    class:list={[
+                      'h-0.5 flex-1 rounded-full transition-colors duration-300',
+                      dot <= i ? 'bg-teal' : 'bg-line',
+                    ]}
+                  />
+                ))
+              }
+            </div>
+            <div class="mb-2 flex items-baseline justify-between gap-3">
+              <h3 class="font-display text-lg font-bold text-text-primary">{step.title}</h3>
+              <span class="shrink-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
+                {step.timing}
+              </span>
+            </div>
+            <p class="text-sm leading-relaxed text-text-secondary">{step.description}</p>
+            <dl class="mt-5 flex flex-1 flex-col gap-3 border-t border-line pt-5">
+              <div class="flex gap-3">
+                <dt class="w-20 shrink-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
+                  You bring
+                </dt>
+                <dd class="flex-1 text-sm leading-relaxed text-text-secondary">{step.youBring}</dd>
+              </div>
+              <div class="flex gap-3">
+                <dt class="w-20 shrink-0 font-mono text-[10px] uppercase tracking-wider text-teal">
+                  You get
+                </dt>
+                <dd class="flex-1 text-sm leading-relaxed text-text-primary">{step.youGet}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>

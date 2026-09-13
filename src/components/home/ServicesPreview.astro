@@ -1,0 +1,189 @@
+---
+import { ArrowUpRight } from 'lucide-react';
+import { beyondTheCode, technicalServices } from '@/components/services/data';
+import { MOTIF_PANEL_GRID, MOTIF_SIGNAL } from '@/components/services/motifs';
+
+// Teaser for /services. Reuses the canonical service data and motifs from the
+// services module so the landing copy can never drift from the services page.
+// Astro rather than a React island: the whole section is static, and the shared
+// [data-reveal] observer in BaseLayout already handles scroll entry.
+const preview = technicalServices;
+---
+
+<section data-scene="circuit" class="relative w-full border-t border-line py-16 md:py-24">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
+      <div class="lg:sticky lg:top-24 lg:col-span-5">
+        <span
+          class="mb-4 block font-mono text-xs uppercase tracking-[0.25em] text-teal"
+          data-reveal
+        >
+          02 / Services
+        </span>
+        <h2
+          class="font-display text-3xl font-bold tracking-tight text-text-primary md:text-5xl lg:text-6xl"
+          data-reveal
+          style={{ '--reveal-delay': '0.06s' }}
+        >
+          Ways to work<br />with me
+        </h2>
+        <p
+          class="mt-5 max-w-md text-base leading-relaxed text-text-secondary"
+          data-reveal
+          style={{ '--reveal-delay': '0.12s' }}
+        >
+          Five kinds of engineering work, one written scope, and a price you know before anything
+          gets built. Talks and mentoring when the system needs explaining instead.
+        </p>
+
+        <div
+          class="mt-8 flex flex-col gap-4"
+          data-reveal
+          style={{ '--reveal-delay': '0.18s' }}
+        >
+          <a
+            href="/services"
+            class="glass-cta group relative inline-flex w-fit items-center gap-3 rounded-lg px-6 py-4 font-mono text-sm font-semibold uppercase tracking-widest transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 active:translate-y-0"
+          >
+            See how it works
+            <span class="flex h-6 w-6 items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1">
+              →
+            </span>
+          </a>
+          <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-text-tertiary">
+            Freelance · Contract · Full-time · Speaking
+          </p>
+        </div>
+
+        <div
+          aria-hidden="true"
+          class="mt-10 hidden h-24 items-center text-teal opacity-40 lg:flex"
+          data-reveal
+          style={{ '--reveal-delay': '0.24s' }}
+        >
+          <div class="h-full w-[220px]">
+            <Fragment set:html={MOTIF_SIGNAL} />
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {
+            preview.map((service, i) => (
+              <a
+                href="/services"
+                class:list={[
+                  'card-base group relative flex h-full flex-col overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1',
+                  i === 0 && 'sm:col-span-2',
+                ]}
+                data-reveal
+                style={{ '--reveal-delay': `${0.1 + i * 0.07}s` }}
+              >
+                <span
+                  aria-hidden="true"
+                  class="absolute inset-x-0 top-0 h-px bg-teal opacity-0 transition-opacity duration-500 group-hover:opacity-80"
+                />
+                <div
+                  class:list={[
+                    'relative flex items-center justify-center overflow-hidden border-b border-line bg-bg-elevated text-teal',
+                    i === 0 ? 'h-32' : 'h-24',
+                  ]}
+                  style={MOTIF_PANEL_GRID}
+                >
+                  <div
+                    class:list={[
+                      'max-w-full opacity-70 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] group-hover:opacity-100',
+                      i === 0 ? 'h-[88px] w-[220px]' : 'h-[68px] w-[172px]',
+                    ]}
+                  >
+                    <Fragment set:html={service.motif} />
+                  </div>
+                  <span
+                    aria-hidden="true"
+                    class="absolute left-4 top-3 font-mono text-[11px] tracking-wider text-text-tertiary transition-colors duration-500 group-hover:text-teal"
+                  >
+                    {service.index}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-x-0 bottom-0 h-9 bg-gradient-to-t from-bg-card to-transparent"
+                  />
+                </div>
+                <div class="flex flex-1 flex-col p-5">
+                  <h3 class="mb-1.5 font-display text-base font-bold text-text-primary transition-colors duration-300 group-hover:text-teal">
+                    {service.title}
+                  </h3>
+                  <p class="text-sm leading-relaxed text-text-secondary">{service.outcome}</p>
+                  {i === 0 && (
+                    <p class="mt-2 flex-1 text-sm leading-relaxed text-text-tertiary">
+                      {service.description}
+                    </p>
+                  )}
+                  <div class="mt-4 flex flex-wrap items-center gap-1.5">
+                    {service.stack.map((item) => (
+                      <span class="rounded-md border border-line bg-bg-elevated px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-300 group-hover:border-line-hover group-hover:text-text-secondary">
+                        {item}
+                      </span>
+                    ))}
+                    <ArrowUpRight
+                      size={13}
+                      class="ml-auto shrink-0 text-text-tertiary transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-teal"
+                    />
+                  </div>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="mt-16 border-t border-line pt-8 md:mt-20 md:pt-10"
+      data-reveal
+      style={{ '--reveal-delay': '0.32s' }}
+    >
+      <span class="mb-4 block font-mono text-xs uppercase tracking-[0.25em] text-amber">
+        02a / Beyond the code
+      </span>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {
+          beyondTheCode.map((offer, i) => (
+            <a
+              href="/services"
+              class="card-base group relative flex items-stretch overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
+              data-reveal
+              style={{ '--reveal-delay': `${0.38 + i * 0.06}s` }}
+            >
+              <span
+                aria-hidden="true"
+                class="absolute inset-x-0 top-0 h-px bg-amber opacity-0 transition-opacity duration-500 group-hover:opacity-80"
+              />
+              <div
+                class="relative flex w-[104px] shrink-0 items-center justify-center overflow-hidden border-r border-line bg-bg-elevated text-amber sm:w-[124px]"
+                style={MOTIF_PANEL_GRID}
+              >
+                <div class="h-[56px] w-[104px] max-w-full opacity-70 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] group-hover:opacity-100">
+                  <Fragment set:html={offer.motif} />
+                </div>
+              </div>
+              <div class="flex flex-1 flex-col justify-center gap-1 p-4">
+                <span class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-text-primary transition-colors duration-300 group-hover:text-amber">
+                    {offer.title}
+                  </span>
+                  <ArrowUpRight
+                    size={13}
+                    class="ml-auto shrink-0 text-text-tertiary transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-amber"
+                  />
+                </span>
+                <span class="text-xs leading-snug text-text-tertiary">{offer.outcome}</span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,57 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { ProjectsGrid } from '../../components/projects/ProjectsGrid';
+import { getProjects, ApiFetchFailedError } from '../../lib/api';
+import { getSiteUrl, serviceUnavailableResponse } from '../../lib/site';
+import { PageHero } from '@/components/shared';
+import { buildBreadcrumbSchema, buildProjectCollectionSchema } from '../../lib/seo';
+
+let projects;
+try {
+  ({ projects } = await getProjects());
+} catch (error) {
+  if (error instanceof ApiFetchFailedError) {
+    return serviceUnavailableResponse();
+  }
+  throw error;
+}
+
+// "Projects" alone targets nothing. The category names come from the live
+// project data (Web Development / IoT & Hardware / Desktop Application), so
+// the title describes what is actually on the page.
+const title = 'IoT, Web & Hardware Projects';
+const description =
+  'Engineering case studies: IoT water-quality monitoring over MQTT, full-stack platforms in Next.js and Laravel, and Rust and Tauri desktop apps.';
+
+const siteUrl = getSiteUrl();
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', path: '/' },
+  { name: 'Projects', path: '/projects' },
+]);
+const collectionSchema = buildProjectCollectionSchema(projects, {
+  canonicalPath: '/projects',
+  name: 'Projects',
+  description,
+});---
+
+<PageLayout
+  title={title}
+  description={description}
+  canonicalUrl={`${siteUrl}/projects`}
+>
+  <div class="min-h-screen py-12 md:py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <PageHero
+        eyebrow="Projects"
+        title="Stuff I've built"
+        description="A mix of real projects. Some software, some hardware, some both. Each one taught me something the tutorials didn't."
+      />
+
+      <ProjectsGrid client:load projects={projects} />
+    </div>
+  </div>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+</PageLayout>

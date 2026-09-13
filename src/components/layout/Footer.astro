@@ -1,0 +1,109 @@
+---
+import { Github, Linkedin, Twitter, Mail, Globe, Instagram, Youtube } from 'lucide-react';
+import { getAboutSafe } from '@/lib/api';
+import { filterPublicSocialLinks } from '@/lib/social-links';
+import { getJakartaYear } from '@/lib/utils';
+
+const currentYear = getJakartaYear();
+const about = await getAboutSafe();
+
+const iconMap = {
+  github: Github,
+  linkedin: Linkedin,
+  twitter: Twitter,
+  x: Twitter,
+  instagram: Instagram,
+  youtube: Youtube,
+  email: Mail,
+  website: Globe,
+} as const;
+
+const socialLinks = filterPublicSocialLinks(about.socialLinks).map((link) => ({
+  href: link.url,
+  label: link.platform,
+  icon: iconMap[link.platform.toLowerCase() as keyof typeof iconMap] || Globe,
+}));
+
+const quickLinks = [
+  { href: '/about', label: 'About' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/services', label: 'Services' },
+  { href: '/publications', label: 'Publication' },
+  { href: '/ai-chatbot', label: 'AI Assistant' },
+  { href: '/contact', label: 'Contact' },
+];
+
+interface Props {
+  className?: string;
+}
+
+const { className } = Astro.props;---
+
+<footer
+  class:list={[
+    'relative z-10 border-t border-line bg-bg-elevated py-12 pb-28 md:pb-12',
+    className,
+  ]}
+>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="text-center md:text-left">
+        <a
+          href="/"
+          class="text-2xl font-bold font-display text-teal transition-all duration-300 hover:brightness-110"
+        >
+          Nau.
+        </a>
+      </div>
+
+      <div class="text-center">
+        <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wide mb-4">
+          Quick Links
+        </h3>
+        <div class="flex flex-wrap justify-center gap-2">
+          {
+            quickLinks.map((link) => (
+              <a
+                href={link.href}
+                class="px-3 py-1.5 rounded-lg text-sm text-text-secondary transition-all duration-300 hover:text-teal hover:bg-bg-card"
+              >
+                {link.label}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="text-center md:text-right">
+        <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wide mb-4">Connect</h3>
+        <div class="flex items-center justify-center md:justify-end gap-3">
+          {
+            socialLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="p-2.5 rounded-lg border border-line text-text-secondary transition-all duration-300 hover:border-line-hover hover:text-teal hover:-translate-y-0.5"
+                  aria-label={link.label}
+                >
+                  <Icon size={18} />
+                </a>
+              );
+            })
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-line">
+      <div class="flex items-center justify-center">
+        <p class="text-sm text-text-secondary font-mono">
+          © {currentYear}
+          <span class="text-teal font-medium">Nau.</span> All rights reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

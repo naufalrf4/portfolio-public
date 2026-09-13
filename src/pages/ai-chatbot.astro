@@ -1,0 +1,24 @@
+---
+import { PageHero } from '@/components/shared';
+import PageLayout from '../layouts/PageLayout.astro';
+import { ChatWindow } from '../components/chatbot/ChatWindow';
+
+const title = "AI Assistant";
+const description = 'Chat with Nau AI about Naufal Rizqullah Firdaus, his System & Automation Engineer profile, projects, IPB University background, automation systems, IoT builds, AI workflows, and practical engineering work.';---
+
+<PageLayout title={title} description={description} hideFooter={true}>
+  <section class="flex h-[calc(100dvh-5rem)] flex-col overflow-hidden">
+    <div class="mx-auto flex w-full max-w-7xl flex-1 flex-col overflow-hidden px-4 pt-6 pb-4 sm:px-6 lg:px-8 lg:pt-8 lg:pb-6">
+      <PageHero
+        eyebrow="Ask away"
+        title="Got questions? Ask my AI"
+        description="Curious about a project or how something works? Just ask. It knows my stuff pretty well."
+        className="mb-4 md:mb-6"
+      />
+
+      <div class="homepage-reveal min-h-0 flex-1" style="animation-delay:0.22s">
+        <ChatWindow client:load isFullPage={true} className="h-full" />
+      </div>
+    </div>
+  </section>
+</PageLayout>

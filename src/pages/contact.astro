@@ -1,0 +1,44 @@
+---
+import { ContactContent } from '../components/contact/ContactContent';
+import { faqs } from '../components/services/data';
+import { PageHero } from '../components/shared';
+import PageLayout from '../layouts/PageLayout.astro';
+import { getAboutSafe } from '../lib/api';
+import { buildBreadcrumbSchema, buildFaqSchema } from '../lib/seo';
+
+// Contact form is functional even without profile data (e.g. social links),
+// so this uses the non-throwing safe variant rather than 503-ing the whole
+// page when the Admin API is unreachable.
+const aboutData = await getAboutSafe();
+const turnstileSiteKey =
+  process.env.PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
+  import.meta.env.PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
+  '';
+
+const title = 'Contact & Hire';
+const description =
+  'Available for freelance, contract, and full-time work from Depok, Indonesia or remote: web builds, IoT monitoring, automation, and AI integration.';
+
+const faqSchema = buildFaqSchema(faqs, '/contact');
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', path: '/' },
+  { name: 'Contact', path: '/contact' },
+]);
+---
+
+<PageLayout title={title} description={description} canonicalUrl="/contact">
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+  <div class="py-12 md:py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <PageHero
+        eyebrow="Say hello"
+        title="Let's talk"
+        description="Got a project, a question, or just want to chat? Drop a message or book a call. I read everything."
+      />
+    </div>
+    <ContactContent client:load aboutData={aboutData} turnstileSiteKey={turnstileSiteKey} />
+  </div>
+</PageLayout>

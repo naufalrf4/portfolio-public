@@ -1,0 +1,51 @@
+---
+import { BlogsContent } from '@/components/blogs';
+import { PageHero } from '@/components/shared';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { getBlogs, ApiFetchFailedError } from '@/lib/api';
+import { serviceUnavailableResponse } from '@/lib/site';
+import { buildBreadcrumbSchema, buildPublicationCollectionSchema } from '@/lib/seo';
+
+let blogs;
+try {
+  ({ blogs } = await getBlogs());
+} catch (error) {
+  if (error instanceof ApiFetchFailedError) {
+    return serviceUnavailableResponse();
+  }
+  throw error;
+}
+
+// The real list is IoT water-quality research, MQTT protocol writing, and
+// sensor-calibration work, per the live blogs API - not generic "automation".
+const title = 'Publications & Engineering Notes';
+const description =
+  'Research and writing on IoT water quality monitoring, MQTT versus HTTP for connected devices, and dissolved oxygen sensor calibration.';
+
+const collectionSchema = buildPublicationCollectionSchema(blogs, {
+  canonicalPath: '/publications',
+  name: 'Publications',
+  description,
+});
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', path: '/' },
+  { name: 'Publications', path: '/publications' },
+]);---
+
+<PageLayout title={title} description={description} canonicalUrl="/publications">
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+  <div class="min-h-screen py-12 md:py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <PageHero
+        eyebrow="Writing"
+        title="Things I've written"
+        description="Stuff I've written myself, plus a few pieces others wrote about my work."
+      />
+
+      <BlogsContent initialBlogs={blogs} client:load />
+    </div>
+  </div>
+</PageLayout>

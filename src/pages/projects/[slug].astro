@@ -1,0 +1,42 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { ProjectDetail } from '../../components/project-detail/ProjectDetail';
+import { getProjectBySlug } from '../../lib/api';
+import { getSiteUrl } from '../../lib/site';
+import { formatDate } from '../../lib/utils';
+import { buildBreadcrumbSchema, buildProjectSchema, stableImageUrl } from '../../lib/seo';
+
+const { slug } = Astro.params;
+
+const project = slug ? await getProjectBySlug(slug) : null;
+
+if (!project) {
+  Astro.response.status = 404;
+  return Astro.rewrite('/404');
+}
+
+const siteUrl = getSiteUrl();
+
+const lastModified = project.updatedAt;
+
+const projectSchema = buildProjectSchema(project);
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', path: '/' },
+  { name: 'Projects', path: '/projects' },
+  { name: project.title, path: `/projects/${project.slug}` },
+]);---
+
+<PageLayout
+  title={project.title}
+  description={project.summary}
+  ogImage={stableImageUrl(project.imageUrl)}
+  ogType="article"
+>
+  <div>
+    <ProjectDetail project={project} lastUpdated={formatDate(lastModified)} client:load />
+    <script type="application/ld+json" set:html={JSON.stringify(projectSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </div>
+</PageLayout>
+
