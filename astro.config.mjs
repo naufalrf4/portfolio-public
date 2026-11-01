@@ -1,11 +1,16 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import cloudflare from '@astrojs/cloudflare';
+import node from '@astrojs/node';
 import tailwindcss from '@tailwindcss/vite';
+
+const adapter = process.env.CF_PAGES === '1'
+  ? cloudflare({ imageService: 'compile' })
+  : node({ mode: 'standalone' });
 
 export default defineConfig({
   output: 'server',
-  adapter: cloudflare({ imageService: 'compile' }),
+  adapter,
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
