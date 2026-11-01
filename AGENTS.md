@@ -6,8 +6,8 @@ Authoritative AI control contract for this repository.
 
 - **Name:** `apps/public-astro`
 - **Purpose:** serve the public portfolio experience and AI chat entrypoint
-- **Architecture:** Astro 5 site with React islands and API consumption from Admin plus RAG chat integration
-- **Execution Model:** runs independently from `apps/public-astro`; reads content from Admin public APIs and sends chat requests to the RAG service
+- **Architecture:** Astro 5 site with React islands and API consumption from Admin, including an Admin-proxied RAG chat flow
+- **Execution Model:** runs independently from `apps/public-astro`; all server-side content and chat requests go through Admin APIs
 - **Critical Domains:** dark-first design system parity, SEO metadata, Admin public API compatibility, chatbot integration
 
 ## 2. Technology Baseline
@@ -19,7 +19,7 @@ Authoritative AI control contract for this repository.
 - **Package Manager:** Bun via `bun.lock`
 - **Version Policy:** use versions resolved from `package.json` and `bun.lock`; never guess from memory
 - **State Management:** Astro page data plus app-local React state where needed
-- **Database / ORM:** none directly; consume Admin APIs and the RAG chat API only
+- **Database / ORM:** none directly; consume Admin APIs only
 - **Testing Stack:** `bun run build`; no lint or automated test script currently exists
 
 ## 3. Architecture and Structure Rules
