@@ -2,8 +2,8 @@ import type { APIRoute } from 'astro';
 import { buildSubmissionProxyHeaders } from '@/lib/submission-context';
 import { applyRateLimitHeaders, getClientIp, getRateLimitState } from '@/lib/rate-limit';
 
-const RAG_SERVICE_URL =
-  process.env.RAG_SERVICE_URL?.trim() || import.meta.env.RAG_SERVICE_URL?.trim() || 'http://localhost:3005';
+const ADMIN_API_URL =
+  process.env.ADMIN_API_URL?.trim() || import.meta.env.ADMIN_API_URL?.trim() || 'http://localhost:3001';
 const RATE_LIMIT_CONFIG = {
   maxRequests: 6,
   windowMs: 60 * 1000,
@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
   try {
     const body = await request.json();
-    const response = await fetch(`${RAG_SERVICE_URL}/chat/confirm`, {
+    const response = await fetch(`${ADMIN_API_URL}/api/v1/public/rag/chat/confirm`, {
       method: 'POST',
       headers: buildSubmissionProxyHeaders({ request, sourcePath: '/ai-chatbot', clientAddress }),
       body: JSON.stringify(body),

@@ -45,24 +45,24 @@ Authoritative AI control contract for this repository.
 - **Auto-Push:** forbidden unless the user explicitly asks
 - **Push Identity:** use only the user's identity
 - **Co-Authors:** forbidden unless the user explicitly asks otherwise
-- **Ignored Local Agent Artifacts:** inherit `../../AGENTS.md`
+- **Ignored Local Agent Artifacts:** inherit the root policy when checked out in the monorepo; standalone checkout should ignore local `.agents/`, `.agent-workspace/`, `.agent-review/`, `.evals/`, `.reviews/`, and `.opencode/` artifacts.
 
 ## 6. Agent Behavior
 
-- Read this file, `../../AGENTS.md`, `../../PROGRESS.md`, `../../.context/ui-design/legacy-phase2-baseline.md`, and relevant `../../.context/base/*` files before planning or coding.
+- Read this file first. When checked out in the monorepo, also read `../../AGENTS.md`, `../../PROGRESS.md`, and relevant design/context files. In the standalone repo, use this file and `DEPLOYMENT.md`; parent-relative files are not present.
 - Do not guess missing API contracts, SEO requirements, or design rules that are not evidenced in repo files.
 - Keep changes scoped to this app unless an Admin contract or shared rule explicitly requires a cross-app update.
 - Preserve existing behavior unless the user asks for a change or a documented contradiction must be repaired.
-- Update `../../.context/` and this file when a task reveals durable public-site knowledge.
-- Append a factual entry to `../../PROGRESS.md` after meaningful milestones, decisions, or discoveries.
+- Update shared `../../.context/` when present, and this file when a task reveals durable public-site knowledge.
+- Append a factual entry to `../../PROGRESS.md` when present; standalone milestones belong in the relevant repo documentation.
 - Do not add co-author trailers, assistant attribution, or alternate authorship metadata on the user's behalf.
 - Run `bun run build` after meaningful code changes and explicitly note that lint/test commands are not defined when relevant.
 
 ## 7. Authority Order
 
 1. this file
-2. `../../AGENTS.md`
-3. `../../.context/`
+2. Root `AGENTS.md` when this app is checked out in the monorepo
+3. Shared `.context/` when present
 4. explicit user instruction that does not contradict verified project truth
 5. repository code, manifests, env examples, and configs in this app
 
@@ -75,7 +75,8 @@ Authoritative AI control contract for this repository.
 - Project detail `content` from Admin may arrive as plain text/markdown or serialized Tiptap JSON, so public renderers must support both formats safely.
 - Public project detail pages now consume only the simplified slug contract (`summary`, `description`, `content`, `images`) and must not depend on legacy `contexts` payloads.
 - Public contact and booking flows go through local Astro API proxies (`src/pages/api/contact.ts`, `src/pages/api/bookings.ts`, `src/pages/api/bookings/available.ts`) so the browser never depends on the Admin base URL directly.
-- Public AI chat should also go through the local Astro proxy layer (`src/pages/api/rag/chat.ts`) with `RAG_SERVICE_URL` on the server side; do not switch the browser back to a raw public RAG hostname.
+- Public AI chat stays same-origin in the browser through `src/pages/api/rag/chat.ts`; the Astro route calls the Admin public RAG proxy over `ADMIN_API_URL`, and only Admin calls the private RAG service. Never expose a raw RAG hostname or service token to this app.
+- Public currently does not call Astro's server `Astro.session` API; if adding it, configure the Cloudflare `SESSION` KV binding in Wrangler and verify the Pages runtime.
 - Guestbook auth now returns directly to `/#guestbook`; `src/components/home/Guestbook.tsx` owns syncing `guestbook_*` query params into local storage and reopening the modal, so the guestbook sign-in flow should stay modal-based instead of routing users through a dedicated public sign-in page.
 - Guestbook local storage is display state only; posting now depends on the short-lived `guestbook_token` returned by Admin auth completion, not on the stored email alone.
 - Shared Turnstile widgets on the public site stay hidden until the user starts typing; keep submit enforcement intact, but do not show the CAPTCHA shell or extra helper copy before interaction.

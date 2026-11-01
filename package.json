@@ -1,5 +1,6 @@
 {
   "name": "public-astro",
+  "packageManager": "bun@1.4.3",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -9,7 +10,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.4",
+    "@astrojs/cloudflare": "12.6.13",
     "@astrojs/react": "^4.4.2",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.0",
@@ -29,6 +30,7 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "wrangler": "4.156.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -36,5 +38,8 @@
     "sharp": "^0.35.4",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

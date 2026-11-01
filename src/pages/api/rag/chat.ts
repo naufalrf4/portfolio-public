@@ -2,15 +2,15 @@ import type { APIRoute } from 'astro';
 import { buildSubmissionProxyHeaders } from '@/lib/submission-context';
 import { applyRateLimitHeaders, getClientIp, getRateLimitState } from '@/lib/rate-limit';
 
-const RAG_SERVICE_URL =
-  process.env.RAG_SERVICE_URL?.trim() || import.meta.env.RAG_SERVICE_URL?.trim() || 'http://localhost:3005';
+const ADMIN_API_URL =
+  process.env.ADMIN_API_URL?.trim() || import.meta.env.ADMIN_API_URL?.trim() || 'http://localhost:3001';
 const RATE_LIMIT_CONFIG = {
   maxRequests: 12,
   windowMs: 60 * 1000,
 };
 
 async function proxy(request: Request, body: unknown, clientAddress: string): Promise<Response> {
-  const response = await fetch(`${RAG_SERVICE_URL}/chat`, {
+  const response = await fetch(`${ADMIN_API_URL}/api/v1/public/rag/chat`, {
     method: 'POST',
     headers: buildSubmissionProxyHeaders({ request, sourcePath: '/ai-chatbot', clientAddress }),
     body: JSON.stringify(body),
