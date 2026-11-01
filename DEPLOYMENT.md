@@ -23,7 +23,7 @@ Set the same required variables for Preview and Production, with environment-spe
 | `SITE_URL` | build/runtime variable | `https://naufalrf.net`; canonical and sitemap origin. |
 | `PUBLIC_SITE_URL` | server variable | `https://naufalrf.net`; public auth callback/origin behavior. |
 | `PUBLIC_TURNSTILE_SITE_KEY` | public value | Cloudflare Turnstile site key for forms; configure the widget for `naufalrf.net`. |
-| `PUBLIC_CURSOR_WS_URL` | public value | `wss://presence.naufalrf.net/ws`. |
+| `PUBLIC_CURSOR_WS_URL` | public value | `wss://admin.naufalrf.net/presence/ws`; Traefik routes this path to the internal Live Presence service. |
 | `PUBLIC_MOCK_DATA` | build/runtime variable | `false` in Preview and Production. |
 
 The adapter selects a `SESSION` KV driver by default, but this app does not call Astro's server session API and its local Pages SSR smoke passed without that binding. Keep it unconfigured unless a route starts using `Astro.session`; if that changes, declare the KV binding in the Wrangler config and verify Preview. Local Wrangler secrets belong in `.dev.vars`; the file is ignored by Git.
