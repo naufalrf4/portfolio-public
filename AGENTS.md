@@ -85,4 +85,5 @@ Authoritative AI control contract for this repository.
 - The homepage guestbook list now follows a compact legacy-style marquee strip instead of stacked cards; keep the CTA separate and preserve the compact repeated-pill presentation.
 - With Astro `ClientRouter` enabled, React islands that depend on the current pathname must derive it from the browser and resync on `astro:page-load`; a one-time `Astro.url.pathname` prop will go stale after client-side navigation.
 - Public first-party analytics now go through the local Astro proxy route `src/pages/api/analytics.ts`; keep browser telemetry same-origin and forward source headers to Admin instead of posting directly to the Admin hostname from the browser.
+- The shared Presence route is reverse-proxied under `/presence`; health checks must replace the final `/ws` with `/health` while preserving that prefix, or the client will stop before opening its WebSocket.
 - `astro.config.mjs` selects Cloudflare only when `CF_PAGES=1`; normal builds use `@astrojs/node` standalone for the parent's VPS rollback service. `Dockerfile` builds this repo independently for the VPS fallback runtime.

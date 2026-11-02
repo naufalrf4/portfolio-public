@@ -36,7 +36,7 @@ function getHealthUrl(socketUrl: string): string | null {
   try {
     const url = new URL(getSocketUrl(socketUrl));
     url.protocol = url.protocol === 'wss:' ? 'https:' : 'http:';
-    url.pathname = '/health';
+    url.pathname = url.pathname.replace(/\/ws$/, '/health');
     url.search = '';
     url.hash = '';
     return url.toString();
