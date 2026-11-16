@@ -1,14 +1,21 @@
 ---
 import PageLayout from '../../layouts/PageLayout.astro';
 import { ProjectDetail } from '../../components/project-detail/ProjectDetail';
-import { getProjectBySlug } from '../../lib/api';
-import { getSiteUrl } from '../../lib/site';
+import { ApiFetchFailedError, getProjectBySlug } from '../../lib/api';
+import { getSiteUrl, serviceUnavailableResponse } from '../../lib/site';
 import { formatDate } from '../../lib/utils';
 import { buildBreadcrumbSchema, buildProjectSchema, stableImageUrl } from '../../lib/seo';
+import type { Project } from '../../types';
 
 const { slug } = Astro.params;
 
-const project = slug ? await getProjectBySlug(slug) : null;
+let project: Project | null = null;
+try {
+  project = slug ? await getProjectBySlug(slug) : null;
+} catch (error) {
+  if (error instanceof ApiFetchFailedError) return serviceUnavailableResponse();
+  throw error;
+}
 
 if (!project) {
   Astro.response.status = 404;

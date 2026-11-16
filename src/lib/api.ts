@@ -94,6 +94,13 @@ class ApiClientError extends HttpError {
   }
 }
 
+class ApiNotFoundError extends Error {
+  constructor(endpoint: string) {
+    super(`Admin API resource not found: ${endpoint}`);
+    this.name = 'ApiNotFoundError';
+  }
+}
+
 async function apiFetch<T>(endpoint: string): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -103,6 +110,9 @@ async function apiFetch<T>(endpoint: string): Promise<T> {
     const response = await fetch(url, { headers, signal });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new ApiNotFoundError(endpoint);
+      }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
@@ -186,8 +196,9 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   try {
     return await apiFetch<Project>(`/api/v1/public/projects/${encodeURIComponent(slug)}`);
   } catch (error) {
+    if (error instanceof ApiNotFoundError) return null;
     logger.error('Failed to fetch project by slug from Admin API', error, { slug });
-    return null;
+    throw new ApiFetchFailedError('Failed to fetch project by slug from Admin API', error);
   }
 }
 
