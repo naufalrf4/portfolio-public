@@ -15,7 +15,7 @@ interface SendChatMessageOptions {
   request: ChatRequest;
 }
 
-const CHAT_REQUEST_TIMEOUT_MS = 10000;
+const CHAT_REQUEST_TIMEOUT_MS = 75000;
 
 export async function sendChatMessage({ request }: SendChatMessageOptions): Promise<ChatResponse> {
   try {

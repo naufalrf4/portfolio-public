@@ -22,25 +22,6 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
-function simulateStreaming(text: string, onChunk: (chunk: string) => void, onComplete: () => void) {
-  const words = text.split(' ');
-  let currentIndex = 0;
-  let accumulated = '';
-
-  const interval = setInterval(() => {
-    if (currentIndex < words.length) {
-      accumulated += (currentIndex > 0 ? ' ' : '') + words[currentIndex];
-      onChunk(accumulated);
-      currentIndex++;
-    } else {
-      clearInterval(interval);
-      onComplete();
-    }
-  }, 50);
-
-  return interval;
-}
-
 function readStoredMessages(): Message[] {
   if (typeof window === 'undefined') {
     return [];
@@ -117,7 +98,6 @@ export function useChat(): UseChat {
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
   const [confirmingMessageId, setConfirmingMessageId] = useState<string | null>(null);
   const { sessionId, setSessionId, clearSession } = useChatSession();
-  const streamingIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSendingRef = useRef(false);
 
   useEffect(() => {
@@ -168,7 +148,7 @@ export function useChat(): UseChat {
         const assistantMessage: Message = {
           id: assistantMessageId,
           role: 'assistant',
-          content: '',
+          content: response.message,
           timestamp: new Date(),
           sources: response.sources,
           suggestedActions: response.suggestedActions,
@@ -178,25 +158,8 @@ export function useChat(): UseChat {
 
         setMessages((prev) => [...prev, assistantMessage]);
         setShouldScrollToBottom(true);
-        setStreamingMessageId(assistantMessageId);
-
-        if (streamingIntervalRef.current) {
-          clearInterval(streamingIntervalRef.current);
-        }
-
-        streamingIntervalRef.current = simulateStreaming(
-          response.message,
-          (chunk) => {
-            setMessages((prev) =>
-              prev.map((msg) => (msg.id === assistantMessageId ? { ...msg, content: chunk } : msg))
-            );
-          },
-          () => {
-            setStreamingMessageId(null);
-            streamingIntervalRef.current = null;
-            setShouldScrollToBottom(false);
-          }
-        );
+        setStreamingMessageId(null);
+        setShouldScrollToBottom(false);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to send message';
         setError(errorMessage);
@@ -250,10 +213,6 @@ export function useChat(): UseChat {
   );
 
   const clearMessages = useCallback(() => {
-    if (streamingIntervalRef.current) {
-      clearInterval(streamingIntervalRef.current);
-      streamingIntervalRef.current = null;
-    }
     setMessages([]);
     setError(null);
     setStreamingMessageId(null);
