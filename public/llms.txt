@@ -3,7 +3,7 @@
 > Canonical machine-readable profile of Naufal Rizqullah Firdaus — a Full-Stack & AI-Augmented Engineer based in Depok, Indonesia, who builds systems spanning custom hardware, cloud infrastructure, and modern web interfaces, with AI woven into how the work gets done rather than bolted on at the end.
 
 Base URL: https://naufalrf.net/
-Last Updated: 2026-09-01
+Last Updated: 2026-11-02
 
 This file is a curated summary. Every core page on this site also serves clean
 markdown directly: send `Accept: text/markdown` instead of scraping the HTML.
@@ -131,7 +131,7 @@ contract, and full-time.
 
 ## Projects
 
-Eight case studies, each with a full page at `/projects/<slug>` that returns
+Engineering case studies, each with a full page at `/projects/<slug>` that returns
 markdown on request.
 
 ### IoT & Hardware
@@ -247,7 +247,7 @@ The publications list mixes work he authored with coverage written about him.
 
 - https://naufalrf.net/ — Overview and entry point
 - https://naufalrf.net/about — Background, skills, experience, education, certifications, achievements
-- https://naufalrf.net/projects — Eight engineering case studies, individually at /projects/<slug>
+- https://naufalrf.net/projects — Engineering case studies, individually at /projects/<slug>
 - https://naufalrf.net/services — Engagement types, engineering process, what working together involves
 - https://naufalrf.net/publications — Research, writing, and press coverage
 - https://naufalrf.net/contact — Contact and collaboration entry point
