@@ -42,11 +42,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   try {
     const body = await request.json();
     return await proxy(request, 'POST', clientAddress, body);
-  } catch {
+  } catch (error) {
+    const invalidJson = error instanceof SyntaxError;
     return new Response(
-      JSON.stringify({ success: false, error: { message: 'Failed to submit guestbook entry.' } }),
+      JSON.stringify({ success: false, error: { message: invalidJson ? 'Invalid JSON body.' : 'Failed to submit guestbook entry.' } }),
       {
-        status: 500,
+        status: invalidJson ? 400 : 502,
         headers: {
           'Content-Type': 'application/json',
         },

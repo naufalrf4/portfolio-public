@@ -29,11 +29,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   try {
     const body = await request.json();
     return await proxy(request, body, clientAddress);
-  } catch {
+  } catch (error) {
+    const invalidJson = error instanceof SyntaxError;
     return new Response(
-      JSON.stringify({ success: false, error: { message: 'Failed to send your message.' } }),
+      JSON.stringify({ success: false, error: { message: invalidJson ? 'Invalid JSON body.' : 'Failed to send your message.' } }),
       {
-        status: 500,
+        status: invalidJson ? 400 : 502,
         headers: {
           'Content-Type': 'application/json',
         },

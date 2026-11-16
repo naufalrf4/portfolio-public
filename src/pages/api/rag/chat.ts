@@ -54,16 +54,17 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     const response = await proxy(request, body, clientAddress);
     applyRateLimitHeaders(response.headers, rateLimitState);
     return response;
-  } catch {
+  } catch (error) {
+    const invalidJson = error instanceof SyntaxError;
     const headers = new Headers({
       'Content-Type': 'application/json',
     });
     applyRateLimitHeaders(headers, rateLimitState);
 
     return new Response(
-      JSON.stringify({ success: false, error: { message: 'Failed to send chat request.' } }),
+      JSON.stringify({ success: false, error: { message: invalidJson ? 'Invalid JSON body.' : 'Failed to send chat request.' } }),
       {
-        status: 500,
+        status: invalidJson ? 400 : 502,
         headers,
       }
     );

@@ -49,13 +49,14 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       status: response.status,
       headers,
     });
-  } catch {
+  } catch (error) {
+    const invalidJson = error instanceof SyntaxError;
     const headers = new Headers({ 'Content-Type': 'application/json' });
     applyRateLimitHeaders(headers, rateLimitState);
 
     return new Response(
-      JSON.stringify({ success: false, message: 'Failed to confirm action.' }),
-      { status: 500, headers },
+      JSON.stringify({ success: false, message: invalidJson ? 'Invalid JSON body.' : 'Failed to confirm action.' }),
+      { status: invalidJson ? 400 : 502, headers },
     );
   }
 };
