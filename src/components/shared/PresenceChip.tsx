@@ -10,7 +10,7 @@ interface PresenceChipProps {
 
 export function PresenceChip({ currentPath, socketUrl }: PresenceChipProps) {
   const pathname = useAstroPathname(currentPath);
-  const { status, totalParticipants } = useLiveCursorPresence(currentPath, socketUrl);
+  const { status, totalParticipants } = useLiveCursorPresence(pathname, socketUrl);
 
   return (
     <div className="inline-flex items-center gap-2 md:hidden">
