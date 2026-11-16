@@ -82,7 +82,7 @@ const personSchema = {
   // same `@id`, so hardcoding a title here contradicted the CMS-driven one and
   // asserted two different job titles for one entity. Read the real value and
   // fall back only when the profile has no roles at all.
-  jobTitle: about.roles?.find((role) => role.trim().length > 0) || 'System & Automation Engineer',
+  jobTitle: about.roles?.find((role) => role.trim().length > 0) || 'AI-Augmented Engineer',
   knowsAbout: (about.skills ?? [])
     .map((skill) => skill.name)
     .filter((name) => Boolean(name && name.trim())),
@@ -175,7 +175,10 @@ const websiteSchema = {
       aria-hidden="true"
     >
     </div>
-    <GlobalScene client:load transition:persist />
+    <GlobalScene
+      client:media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
+      transition:persist
+    />
     <LiveCursorBand client:idle currentPath={currentPath} socketUrl={presenceSocketUrl} />
     <ScrollToTopButton client:load currentPath={currentPath} />
     <Navbar />
